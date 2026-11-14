@@ -1,0 +1,1962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THRILLER — Nature's Drama in 5 Acts</title>
+  <style>
+    :root {
+      --act-bg-1: #0e0c07;
+      --act-bg-2: #1c150a;
+      --act-accent: #f59e0b;
+      --act-accent-glow: rgba(245, 158, 11, 0.25);
+      --act-badge-bg: rgba(245, 158, 11, 0.15);
+      --act-border: rgba(245, 158, 11, 0.3);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --glass-bg: rgba(15, 23, 42, 0.72);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --glass-blur: blur(16px);
+      --header-height: 64px;
+      --filmstrip-height: 96px;
+      --ui-transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background: radial-gradient(circle at 50% 35%, var(--act-bg-2) 0%, var(--act-bg-1) 100%);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: background 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Ambient dynamic glow ring */
+    .ambient-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 85vw;
+      height: 85vh;
+      background: radial-gradient(circle, var(--act-accent-glow) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 1;
+      filter: blur(40px);
+      opacity: 0.85;
+      transition: background 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Top Navigation Bar */
+    header {
+      position: relative;
+      z-index: 20;
+      height: var(--header-height);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.5rem;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border-bottom: 1px solid var(--glass-border);
+      gap: 1rem;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .story-title {
+      font-weight: 800;
+      font-size: 1.05rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #ffffff 40%, var(--act-accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .act-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.65rem;
+      background: var(--act-badge-bg);
+      border: 1px solid var(--act-border);
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--act-accent);
+      text-transform: uppercase;
+      transition: var(--ui-transition);
+    }
+
+    /* Acts Timeline Tabs */
+    .acts-nav {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(0, 0, 0, 0.35);
+      padding: 0.25rem 0.35rem;
+      border-radius: 9999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .acts-nav::-webkit-scrollbar { display: none; }
+
+    .act-tab {
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .act-tab:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .act-tab.active {
+      background: var(--act-accent);
+      color: #000000;
+      font-weight: 700;
+      box-shadow: 0 0 16px var(--act-accent-glow);
+    }
+
+    /* Header Controls */
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-shrink: 0;
+    }
+
+    .control-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 0.55rem;
+      color: var(--text-main);
+      padding: 0.4rem 0.65rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: all 0.2s ease;
+    }
+
+    .control-btn:hover {
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+    }
+
+    .control-btn.active {
+      background: var(--act-accent);
+      color: #000000;
+      border-color: var(--act-accent);
+      font-weight: 700;
+    }
+
+    .sound-group {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 0.55rem;
+      padding: 0.2rem 0.5rem;
+    }
+
+    .volume-slider {
+      width: 60px;
+      height: 4px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--act-accent);
+      cursor: pointer;
+      box-shadow: 0 0 6px var(--act-accent);
+    }
+
+    /* Sound visualizer wave bars */
+    .sound-wave {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      height: 14px;
+    }
+
+    .sound-wave span {
+      width: 2.5px;
+      height: 4px;
+      background: currentColor;
+      border-radius: 1px;
+      transition: height 0.2s ease;
+    }
+
+    .sound-wave.playing span:nth-child(1) { animation: wave 0.8s ease-in-out infinite; }
+    .sound-wave.playing span:nth-child(2) { animation: wave 0.6s ease-in-out infinite 0.15s; }
+    .sound-wave.playing span:nth-child(3) { animation: wave 0.9s ease-in-out infinite 0.3s; }
+    .sound-wave.playing span:nth-child(4) { animation: wave 0.7s ease-in-out infinite 0.45s; }
+
+    @keyframes wave {
+      0%, 100% { height: 4px; }
+      50% { height: 14px; }
+    }
+
+    /* Autoplay countdown ring */
+    .autoplay-ring {
+      position: relative;
+      width: 16px;
+      height: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .autoplay-ring svg {
+      transform: rotate(-90deg);
+      width: 16px;
+      height: 16px;
+    }
+
+    .autoplay-ring circle {
+      fill: none;
+      stroke-width: 2.5;
+    }
+
+    .autoplay-ring .bg {
+      stroke: rgba(255, 255, 255, 0.2);
+    }
+
+    .autoplay-ring .progress {
+      stroke: currentColor;
+      stroke-dasharray: 40;
+      stroke-dashoffset: 40;
+      transition: stroke-dashoffset 0.1s linear;
+    }
+
+    /* Main Stage Viewport */
+    main {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    .viewport-container {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      cursor: default;
+    }
+
+    .viewport-container.is-zoomed {
+      cursor: grab;
+    }
+
+    .viewport-container.is-zoomed.is-dragging {
+      cursor: grabbing;
+    }
+
+    .image-wrapper {
+      position: relative;
+      max-width: 100%;
+      max-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform-origin: center center;
+      will-change: transform;
+    }
+
+    .main-photo {
+      max-width: 90vw;
+      max-height: calc(100vh - var(--header-height) - var(--filmstrip-height) - 40px);
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      transition: opacity 0.3s ease, filter 0.3s ease;
+      pointer-events: auto;
+    }
+
+    .main-photo.loading {
+      opacity: 0.35;
+      filter: blur(6px);
+    }
+
+    /* Spinner */
+    .loader {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 48px;
+      height: 48px;
+      border: 3px solid rgba(255, 255, 255, 0.15);
+      border-top-color: var(--act-accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      z-index: 15;
+    }
+
+    .loader.active {
+      opacity: 1;
+    }
+
+    @keyframes spin {
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    /* Nav Chevrons */
+    .nav-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 54px;
+      height: 84px;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 25;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      opacity: 0.65;
+    }
+
+    .nav-arrow:hover {
+      opacity: 1;
+      background: rgba(15, 23, 42, 0.85);
+      border-color: var(--act-accent);
+      transform: translateY(-50%) scale(1.08);
+      box-shadow: 0 0 20px var(--act-accent-glow);
+    }
+
+    .nav-arrow.prev { left: 1.5rem; }
+    .nav-arrow.next { right: 1.5rem; }
+
+    /* Floating Zoom HUD */
+    .zoom-hud {
+      position: absolute;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      z-index: 25;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .hud-btn {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.08);
+      border: none;
+      border-radius: 6px;
+      color: #ffffff;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+
+    .hud-btn:hover {
+      background: var(--act-accent);
+      color: #000;
+    }
+
+    .zoom-label {
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      padding: 0 0.5rem;
+      min-width: 48px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Floating Act Info Overlay */
+    .floating-act-info {
+      position: absolute;
+      top: 1.5rem;
+      left: 1.5rem;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      border-left: 3px solid var(--act-accent);
+      padding: 0.65rem 1rem;
+      border-radius: 8px;
+      z-index: 25;
+      max-width: 340px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      transition: border-color 0.4s ease;
+      pointer-events: none;
+    }
+
+    .info-act-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .info-meta {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Bottom Filmstrip Drawer */
+    footer {
+      position: relative;
+      z-index: 20;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border-top: 1px solid var(--glass-border);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s ease;
+    }
+
+    .footer-bar {
+      height: 32px;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .filmstrip-toggle {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .filmstrip-toggle:hover {
+      color: #ffffff;
+    }
+
+    .filmstrip-container {
+      height: calc(var(--filmstrip-height) - 32px);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 1.5rem;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+    }
+
+    .filmstrip-container::-webkit-scrollbar {
+      height: 5px;
+    }
+
+    .filmstrip-container::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .filmstrip-container::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+    }
+
+    .filmstrip-container::-webkit-scrollbar-thumb:hover {
+      background: var(--act-accent);
+    }
+
+    .thumb-card {
+      position: relative;
+      flex-shrink: 0;
+      height: 52px;
+      width: 78px;
+      border-radius: 6px;
+      overflow: hidden;
+      cursor: pointer;
+      border: 2px solid transparent;
+      opacity: 0.55;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .thumb-card:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+
+    .thumb-card.active {
+      opacity: 1;
+      border-color: var(--act-accent);
+      transform: scale(1.06);
+      box-shadow: 0 0 12px var(--act-accent-glow);
+    }
+
+    .thumb-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+    }
+
+    .thumb-badge {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      background: rgba(0, 0, 0, 0.75);
+      font-size: 0.55rem;
+      padding: 1px 3px;
+      border-radius: 3px;
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    /* First time audio banner prompt */
+    .audio-prompt-banner {
+      position: fixed;
+      bottom: calc(var(--filmstrip-height) + 1rem);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--act-accent);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), 0 0 20px var(--act-accent-glow);
+      padding: 0.65rem 1.25rem;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      z-index: 50;
+      cursor: pointer;
+      animation: floatPrompt 3s ease-in-out infinite;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+
+    .audio-prompt-banner.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    @keyframes floatPrompt {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-6px); }
+    }
+
+    /* Modal Help Dialog */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 14px;
+      padding: 1.75rem;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+      position: relative;
+    }
+
+    .modal-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.25rem;
+    }
+
+    .modal-close:hover {
+      color: #ffffff;
+    }
+
+    .shortcut-list {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.65rem 1rem;
+      font-size: 0.82rem;
+      margin-top: 0.75rem;
+    }
+
+    .shortcut-key {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-family: monospace;
+      font-weight: 700;
+      color: var(--act-accent);
+      text-align: center;
+      min-width: 24px;
+    }
+
+    .shortcut-desc {
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      header {
+        padding: 0 0.85rem;
+      }
+      .acts-nav {
+        display: none;
+      }
+      .floating-act-info {
+        top: 0.75rem;
+        left: 0.75rem;
+        padding: 0.5rem 0.75rem;
+      }
+      .nav-arrow {
+        width: 40px;
+        height: 60px;
+      }
+      .nav-arrow.prev { left: 0.5rem; }
+      .nav-arrow.next { right: 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Dynamic Colored Glow Backdrop -->
+  <div class="ambient-glow" id="ambientGlow"></div>
+
+  <!-- Header Bar -->
+  <header>
+    <div class="brand-group">
+      <div class="story-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polygon points="5 3 19 12 5 21 5 3"></polygon>
+        </svg>
+        <span>Thriller</span>
+      </div>
+      <div class="act-badge" id="headerActBadge">Act 1: Idyllic Morning</div>
+    </div>
+
+    <!-- Act Selection Pills -->
+    <nav class="acts-nav" id="actsNav" aria-label="Act Navigation">
+      <!-- Generated via JS -->
+    </nav>
+
+    <!-- Controls Toolbar -->
+    <div class="header-controls">
+      <!-- Background Audio Control -->
+      <div class="sound-group" title="Act Theme Background Music (Press M to toggle)">
+        <button class="control-btn" id="soundBtn" style="border:none; padding:0.25rem 0.45rem; background:transparent;">
+          <div class="sound-wave" id="soundWave">
+            <span></span><span></span><span></span><span></span>
+          </div>
+          <span id="soundLabel">Music</span>
+        </button>
+        <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.02" value="0.3" title="Music Volume">
+      </div>
+
+      <!-- Autoplay Control -->
+      <button class="control-btn" id="autoplayBtn" title="Toggle Autoplay (Spacebar / P)">
+        <div class="autoplay-ring">
+          <svg viewBox="0 0 16 16">
+            <circle class="bg" cx="8" cy="8" r="6" />
+            <circle class="progress" id="autoplayProgress" cx="8" cy="8" r="6" />
+          </svg>
+        </div>
+        <span id="autoplayLabel">Autoplay</span>
+      </button>
+
+      <!-- Autoplay Speed -->
+      <select id="speedSelect" class="control-btn" style="padding: 0.35rem 0.45rem; cursor: pointer;" title="Autoplay interval">
+        <option value="3000">3s</option>
+        <option value="5000" selected>5s</option>
+        <option value="8000">8s</option>
+        <option value="12000">12s</option>
+      </select>
+
+      <!-- Fullscreen Button -->
+      <button class="control-btn" id="fullscreenBtn" title="Fullscreen (F)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+        </svg>
+      </button>
+
+      <!-- Help Button -->
+      <button class="control-btn" id="helpBtn" title="Keyboard Shortcuts (?)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Showcase Stage -->
+  <main id="mainStage">
+    <!-- Floating Act Meta Card -->
+    <div class="floating-act-info" id="floatingInfo">
+      <div class="info-act-title" id="infoTitle">Act 1: Idyllic Morning</div>
+      <div class="info-meta" id="infoMeta">Photo 1 of 5 • Total 1 / 24</div>
+    </div>
+
+    <!-- Left & Right Arrow Buttons -->
+    <button class="nav-arrow prev" id="prevBtn" title="Previous Photo (← or A)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </button>
+    <button class="nav-arrow next" id="nextBtn" title="Next Photo (→ or D)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="9 18 15 12 9 6"></polyline>
+      </svg>
+    </button>
+
+    <!-- Zoom & Pan Viewport -->
+    <div class="viewport-container" id="viewport">
+      <div class="image-wrapper" id="imageWrapper">
+        <div class="loader" id="imageLoader"></div>
+        <img class="main-photo" id="mainPhoto" alt="Nature Thriller Scene" draggable="false">
+      </div>
+    </div>
+
+    <!-- Zoom HUD Controls -->
+    <div class="zoom-hud">
+      <button class="hud-btn" id="zoomOutBtn" title="Zoom Out (-)">−</button>
+      <span class="zoom-label" id="zoomLevel">100%</span>
+      <button class="hud-btn" id="zoomInBtn" title="Zoom In (+)">+</button>
+      <button class="hud-btn" id="zoomResetBtn" style="width: auto; padding: 0 0.5rem; font-size: 0.72rem;" title="Reset Zoom / Fit (0)">Fit</button>
+    </div>
+  </main>
+
+  <!-- Bottom Drawer & Filmstrip -->
+  <footer>
+    <div class="footer-bar">
+      <div id="footerFilename">DSC00806.JPG</div>
+      <button class="filmstrip-toggle" id="filmstripToggle">
+        <span id="filmstripToggleText">Hide Filmstrip</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      <div id="footerProgress">1 / 24</div>
+    </div>
+    <div class="filmstrip-container" id="filmstrip">
+      <!-- Thumbnail cards injected dynamically -->
+    </div>
+  </footer>
+
+  <!-- Audio Prompt Floating Banner (Shown until user clicks or activates audio) -->
+  <div class="audio-prompt-banner" id="audioPrompt">
+    <div class="sound-wave playing">
+      <span></span><span></span><span></span><span></span>
+    </div>
+    <span style="font-size: 0.82rem; font-weight: 600;">Click to Enable Atmospheric Act Music 🎵</span>
+  </div>
+
+  <!-- Help & Shortcuts Modal -->
+  <div class="modal-overlay" id="helpModal">
+    <div class="modal-card">
+      <div class="modal-title">
+        <span>Keyboard & Mouse Controls</span>
+        <button class="modal-close" id="modalCloseBtn">&times;</button>
+      </div>
+      <div class="shortcut-list">
+        <div class="shortcut-key">← / A</div>
+        <div class="shortcut-desc">Previous photo</div>
+        <div class="shortcut-key">→ / D</div>
+        <div class="shortcut-desc">Next photo</div>
+        <div class="shortcut-key">Space</div>
+        <div class="shortcut-desc">Toggle Autoplay / Advance</div>
+        <div class="shortcut-key">+ / -</div>
+        <div class="shortcut-desc">Zoom In / Zoom Out</div>
+        <div class="shortcut-key">0</div>
+        <div class="shortcut-desc">Reset Zoom to fit</div>
+        <div class="shortcut-key">Wheel</div>
+        <div class="shortcut-desc">Smooth zoom centered on mouse cursor</div>
+        <div class="shortcut-key">Drag</div>
+        <div class="shortcut-desc">Pan zoomed 24MP image smoothly</div>
+        <div class="shortcut-key">2x Click</div>
+        <div class="shortcut-desc">Double click to quick zoom 2.5x & reset</div>
+        <div class="shortcut-key">M</div>
+        <div class="shortcut-desc">Mute / Unmute theme music</div>
+        <div class="shortcut-key">F</div>
+        <div class="shortcut-desc">Toggle Fullscreen</div>
+        <div class="shortcut-key">1 - 5</div>
+        <div class="shortcut-desc">Jump straight to Act 1 through 5</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Application Logic & Generative Act Music Engine -->
+  <script>
+    /* =========================================================================
+       PHOTO DATA & ACT THEME SPECIFICATIONS
+       ========================================================================= */
+    const PHOTOS = [
+      { file: "Act 1 - Idyllic Morning - DSC00806.JPG", act: 1, actTitle: "Idyllic Morning", id: "DSC00806" },
+      { file: "Act 1 - Idyllic Morning - DSC00808.JPG", act: 1, actTitle: "Idyllic Morning", id: "DSC00808" },
+      { file: "Act 1 - Idyllic Morning - DSC00810.JPG", act: 1, actTitle: "Idyllic Morning", id: "DSC00810" },
+      { file: "Act 1 - Idyllic Morning - DSC00812.JPG", act: 1, actTitle: "Idyllic Morning", id: "DSC00812" },
+      { file: "Act 1 - Idyllic Morning - DSC00829.JPG", act: 1, actTitle: "Idyllic Morning", id: "DSC00829" },
+      { file: "Act 2 - Predator Arrives! - DSC00818.JPG", act: 2, actTitle: "Predator Arrives!", id: "DSC00818" },
+      { file: "Act 2 - Predator Arrives! - DSC00819.JPG", act: 2, actTitle: "Predator Arrives!", id: "DSC00819" },
+      { file: "Act 2 - Predator Arrives! - DSC00820.JPG", act: 2, actTitle: "Predator Arrives!", id: "DSC00820" },
+      { file: "Act 2 - Predator Arrives! - DSC00835.JPG", act: 2, actTitle: "Predator Arrives!", id: "DSC00835" },
+      { file: "Act 3 - The Hunt Is On! - DSC00839.JPG", act: 3, actTitle: "The Hunt Is On!", id: "DSC00839" },
+      { file: "Act 3 - The Hunt Is On! - DSC00840.JPG", act: 3, actTitle: "The Hunt Is On!", id: "DSC00840" },
+      { file: "Act 3 - The Hunt Is On! - DSC00844.JPG", act: 3, actTitle: "The Hunt Is On!", id: "DSC00844" },
+      { file: "Act 3 - The Hunt Is On! - DSC00845.JPG", act: 3, actTitle: "The Hunt Is On!", id: "DSC00845" },
+      { file: "Act 3 - The Hunt Is On! - DSC00861.JPG", act: 3, actTitle: "The Hunt Is On!", id: "DSC00861" },
+      { file: "Act 3 - The Hunt Is On! - DSC00862.JPG", act: 3, actTitle: "The Hunt Is On!", id: "DSC00862" },
+      { file: "Act 3 - The Hunt Is On! - DSC00869.JPG", act: 3, actTitle: "The Hunt Is On!", id: "DSC00869" },
+      { file: "Act 3 - The Hunt Is On! - DSC00873.JPG", act: 3, actTitle: "The Hunt Is On!", id: "DSC00873" },
+      { file: "Act 4 - Don't touch my friends! - DSC00851.JPG", act: 4, actTitle: "Don't touch my friends!", id: "DSC00851" },
+      { file: "Act 4 - Don't touch my friends! - DSC00854.JPG", act: 4, actTitle: "Don't touch my friends!", id: "DSC00854" },
+      { file: "Act 4 - Don't touch my friends! - DSC00885.JPG", act: 4, actTitle: "Don't touch my friends!", id: "DSC00885" },
+      { file: "Act 4 - Don't touch my friends! - DSC00886.JPG", act: 4, actTitle: "Don't touch my friends!", id: "DSC00886" },
+      { file: "Act 4 - Don't touch my friends! - DSC00897.JPG", act: 4, actTitle: "Don't touch my friends!", id: "DSC00897" },
+      { file: "Act 5 - Did you see that? - DSC00926.JPG", act: 5, actTitle: "Did you see that?", id: "DSC00926" },
+      { file: "Act 5 - Did you see that? - DSC00940.JPG", act: 5, actTitle: "Did you see that?", id: "DSC00940" }
+    ];
+
+    const ACT_THEMES = {
+      1: {
+        title: "Idyllic Morning",
+        bg1: "#0b0803",
+        bg2: "#201608",
+        accent: "#f59e0b",
+        glow: "rgba(245, 158, 11, 0.28)",
+        badgeBg: "rgba(245, 158, 11, 0.16)",
+        border: "rgba(245, 158, 11, 0.35)",
+        mood: "Peaceful Dawn & Gentle Nature"
+      },
+      2: {
+        title: "Predator Arrives!",
+        bg1: "#040c0e",
+        bg2: "#0f2226",
+        accent: "#06b6d4",
+        glow: "rgba(6, 182, 212, 0.25)",
+        badgeBg: "rgba(6, 182, 212, 0.16)",
+        border: "rgba(6, 182, 212, 0.35)",
+        mood: "Creeping Shadow & Sudden Tension"
+      },
+      3: {
+        title: "The Hunt Is On!",
+        bg1: "#140405",
+        bg2: "#2b0a0d",
+        accent: "#ef4444",
+        glow: "rgba(239, 68, 68, 0.30)",
+        badgeBg: "rgba(239, 68, 68, 0.18)",
+        border: "rgba(239, 68, 68, 0.40)",
+        mood: "High Adrenaline Chase & Relentless Pursuit"
+      },
+      4: {
+        title: "Don't touch my friends!",
+        bg1: "#10061e",
+        bg2: "#230d3d",
+        accent: "#a855f7",
+        glow: "rgba(168, 85, 247, 0.28)",
+        badgeBg: "rgba(168, 85, 247, 0.18)",
+        border: "rgba(168, 85, 247, 0.40)",
+        mood: "Defiant Confrontation & Heroic Stand"
+      },
+      5: {
+        title: "Did you see that?",
+        bg1: "#030814",
+        bg2: "#0c1a36",
+        accent: "#38bdf8",
+        glow: "rgba(56, 189, 248, 0.26)",
+        badgeBg: "rgba(56, 189, 248, 0.16)",
+        border: "rgba(56, 189, 248, 0.35)",
+        mood: "Mysterious Twilight Aftermath & Awe"
+      }
+    };
+
+    /* Safe URL encoding for filenames containing '?' and special characters */
+    function safeFileUrl(filename, isThumb = false) {
+      const prefix = isThumb ? "thumbs/" : "";
+      return prefix + encodeURIComponent(filename);
+    }
+
+    /* =========================================================================
+       PROCEDURAL WEB AUDIO SYNTHESIZER ENGINE
+       ========================================================================= */
+    class ThrillerAudioEngine {
+      constructor() {
+        this.ctx = null;
+        this.masterGain = null;
+        this.reverbNode = null;
+        this.currentActNodes = [];
+        this.activeAct = null;
+        this.isPlaying = false;
+        this.volume = 0.3;
+        this.timerInterval = null;
+      }
+
+      init() {
+        if (this.ctx) return;
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        this.ctx = new AudioCtx();
+
+        // Master Gain
+        this.masterGain = this.ctx.createGain();
+        this.masterGain.gain.setValueAtTime(this.isPlaying ? this.volume : 0, this.ctx.currentTime);
+
+        // Schroeder-style algorithmic reverb using delay feedback network
+        const delay1 = this.ctx.createDelay();
+        delay1.delayTime.value = 0.045;
+        const feedback1 = this.ctx.createGain();
+        feedback1.gain.value = 0.35;
+
+        const delay2 = this.ctx.createDelay();
+        delay2.delayTime.value = 0.078;
+        const feedback2 = this.ctx.createGain();
+        feedback2.gain.value = 0.28;
+
+        const revFilter = this.ctx.createBiquadFilter();
+        revFilter.type = "lowpass";
+        revFilter.frequency.value = 2200;
+
+        delay1.connect(feedback1);
+        feedback1.connect(delay1);
+        delay2.connect(feedback2);
+        feedback2.connect(delay2);
+
+        const revBus = this.ctx.createGain();
+        revBus.gain.value = 0.45;
+        delay1.connect(revFilter);
+        delay2.connect(revFilter);
+        revFilter.connect(revBus);
+        revBus.connect(this.masterGain);
+
+        this.reverbNode = revBus;
+        this.masterGain.connect(this.ctx.destination);
+      }
+
+      setVolume(val) {
+        this.volume = Math.max(0, Math.min(1, val));
+        if (this.ctx && this.masterGain && this.isPlaying) {
+          this.masterGain.gain.setTargetAtTime(this.volume, this.ctx.currentTime, 0.05);
+        }
+      }
+
+      start() {
+        this.init();
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+        this.isPlaying = true;
+        this.masterGain.gain.setTargetAtTime(this.volume, this.ctx.currentTime, 0.3);
+      }
+
+      stop() {
+        if (!this.ctx) return;
+        this.isPlaying = false;
+        this.masterGain.gain.setTargetAtTime(0, this.ctx.currentTime, 0.3);
+      }
+
+      toggle() {
+        if (this.isPlaying) {
+          this.stop();
+        } else {
+          this.start();
+        }
+        return this.isPlaying;
+      }
+
+      // Smoothly crossfades to new act theme
+      transitionToAct(actNumber) {
+        if (this.activeAct === actNumber) return;
+        this.init();
+        const prevNodes = this.currentActNodes;
+        this.currentActNodes = [];
+        this.activeAct = actNumber;
+
+        // Fade out old act stems
+        if (prevNodes.length > 0) {
+          const now = this.ctx.currentTime;
+          prevNodes.forEach(item => {
+            if (item.gainNode) {
+              item.gainNode.gain.setTargetAtTime(0, now, 0.8);
+            }
+            if (item.timer) {
+              clearInterval(item.timer);
+            }
+            setTimeout(() => {
+              try {
+                if (item.stop) item.stop();
+                if (item.disconnect) item.disconnect();
+              } catch (e) {}
+            }, 2500);
+          });
+        }
+
+        // Spawn new generative music theme for the act
+        this.spawnActTheme(actNumber);
+      }
+
+      spawnActTheme(act) {
+        const now = this.ctx.currentTime;
+        const actBus = this.ctx.createGain();
+        actBus.gain.setValueAtTime(0.001, now);
+        // Gentle ramp in
+        actBus.gain.setTargetAtTime(1.0, now + 0.1, 1.2);
+        actBus.connect(this.masterGain);
+        actBus.connect(this.reverbNode);
+
+        const nodes = [{ gainNode: actBus, disconnect: () => actBus.disconnect() }];
+
+        if (act === 1) {
+          /* ACT 1: IDYLLIC MORNING
+             Warm major pentatonic ambient pad (G, D, B, G) + airy breeze + morning sparkles */
+          const freqs = [98.0, 146.8, 196.0, 246.9, 392.0]; // G2, D3, G3, B3, G4
+          freqs.forEach((f, idx) => {
+            const osc = this.ctx.createOscillator();
+            const filter = this.ctx.createBiquadFilter();
+            const g = this.ctx.createGain();
+
+            osc.type = idx % 2 === 0 ? "sine" : "triangle";
+            osc.frequency.setValueAtTime(f + (Math.random() * 0.4 - 0.2), now);
+
+            filter.type = "lowpass";
+            filter.frequency.setValueAtTime(380 + idx * 80, now);
+
+            // Subtle slow undulating breathing LFO
+            const lfo = this.ctx.createOscillator();
+            const lfoGain = this.ctx.createGain();
+            lfo.frequency.setValueAtTime(0.06 + idx * 0.02, now);
+            lfoGain.gain.setValueAtTime(0.04, now);
+            lfo.connect(lfoGain);
+
+            g.gain.setValueAtTime(0.12 / freqs.length, now);
+            lfoGain.connect(g.gain);
+
+            osc.connect(filter);
+            filter.connect(g);
+            g.connect(actBus);
+
+            osc.start(now);
+            lfo.start(now);
+
+            nodes.push({ stop: () => { osc.stop(); lfo.stop(); } });
+          });
+
+          // Delicate high morning chime sparkles
+          const chimePitches = [783.99, 880.0, 987.77, 1174.66, 1318.51];
+          const chimeTimer = setInterval(() => {
+            if (!this.isPlaying || this.activeAct !== 1) return;
+            const t = this.ctx.currentTime;
+            const chimeOsc = this.ctx.createOscillator();
+            const chimeGain = this.ctx.createGain();
+            const p = chimePitches[Math.floor(Math.random() * chimePitches.length)];
+
+            chimeOsc.type = "sine";
+            chimeOsc.frequency.setValueAtTime(p, t);
+            chimeGain.gain.setValueAtTime(0.001, t);
+            chimeGain.gain.linearRampToValueAtTime(0.05, t + 0.08);
+            chimeGain.gain.exponentialRampToValueAtTime(0.0001, t + 2.4);
+
+            chimeOsc.connect(chimeGain);
+            chimeGain.connect(this.reverbNode);
+            chimeOsc.start(t);
+            chimeOsc.stop(t + 2.5);
+          }, 3200);
+
+          nodes.push({ timer: chimeTimer });
+
+        } else if (act === 2) {
+          /* ACT 2: PREDATOR ARRIVES!
+             Low sub-bass drone (detuned C2/G2) + slow 46 bpm heartbeat pulse + eerie suspended tone */
+          const subOsc1 = this.ctx.createOscillator();
+          const subOsc2 = this.ctx.createOscillator();
+          const subFilter = this.ctx.createBiquadFilter();
+          const subGain = this.ctx.createGain();
+
+          subOsc1.type = "sawtooth";
+          subOsc2.type = "triangle";
+          subOsc1.frequency.setValueAtTime(43.65, now); // F1
+          subOsc2.frequency.setValueAtTime(65.41, now); // C2
+
+          subFilter.type = "lowpass";
+          subFilter.frequency.setValueAtTime(140, now);
+          subGain.gain.setValueAtTime(0.22, now);
+
+          subOsc1.connect(subFilter);
+          subOsc2.connect(subFilter);
+          subFilter.connect(subGain);
+          subGain.connect(actBus);
+
+          subOsc1.start(now);
+          subOsc2.start(now);
+          nodes.push({ stop: () => { subOsc1.stop(); subOsc2.stop(); } });
+
+          // Eerie suspended high shimmer (D minor / tension)
+          const eerieOsc = this.ctx.createOscillator();
+          const eerieGain = this.ctx.createGain();
+          eerieOsc.type = "sine";
+          eerieOsc.frequency.setValueAtTime(293.66, now); // D4
+          eerieGain.gain.setValueAtTime(0.04, now);
+
+          // Slow vibrato
+          const eerieLfo = this.ctx.createOscillator();
+          const eerieLfoGain = this.ctx.createGain();
+          eerieLfo.frequency.setValueAtTime(0.2, now);
+          eerieLfoGain.gain.setValueAtTime(4.0, now);
+          eerieLfo.connect(eerieLfoGain);
+          eerieLfoGain.connect(eerieOsc.frequency);
+
+          eerieOsc.connect(eerieGain);
+          eerieGain.connect(actBus);
+          eerieOsc.start(now);
+          eerieLfo.start(now);
+          nodes.push({ stop: () => { eerieOsc.stop(); eerieLfo.stop(); } });
+
+          // Heartbeat pulse (~48 bpm = every 1.25s)
+          const heartTimer = setInterval(() => {
+            if (!this.isPlaying || this.activeAct !== 2) return;
+            const t = this.ctx.currentTime;
+            const thud = this.ctx.createOscillator();
+            const thudGain = this.ctx.createGain();
+            thud.type = "sine";
+            thud.frequency.setValueAtTime(75, t);
+            thud.frequency.exponentialRampToValueAtTime(32, t + 0.28);
+
+            thudGain.gain.setValueAtTime(0.18, t);
+            thudGain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+
+            thud.connect(thudGain);
+            thudGain.connect(actBus);
+            thud.start(t);
+            thud.stop(t + 0.35);
+          }, 1250);
+
+          nodes.push({ timer: heartTimer });
+
+        } else if (act === 3) {
+          /* ACT 3: THE HUNT IS ON!
+             High adrenaline suspense pulse (116 bpm clock) + driving bass sequence + rising tension */
+          const tempoInterval = 60000 / 116 / 2; // 8th notes ~258ms
+          const huntTimer = setInterval(() => {
+            if (!this.isPlaying || this.activeAct !== 3) return;
+            const t = this.ctx.currentTime;
+
+            // Rhythmic pulse click/tick
+            const tick = this.ctx.createOscillator();
+            const tickFilter = this.ctx.createBiquadFilter();
+            const tickGain = this.ctx.createGain();
+
+            tick.type = "triangle";
+            tick.frequency.setValueAtTime(160 + (Math.random() > 0.5 ? 40 : 0), t);
+
+            tickFilter.type = "bandpass";
+            tickFilter.frequency.setValueAtTime(800, t);
+            tickFilter.Q.value = 3.0;
+
+            tickGain.gain.setValueAtTime(0.08, t);
+            tickGain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+
+            tick.connect(tickFilter);
+            tickFilter.connect(tickGain);
+            tickGain.connect(actBus);
+
+            tick.start(t);
+            tick.stop(t + 0.1);
+          }, tempoInterval);
+
+          nodes.push({ timer: huntTimer });
+
+          // Driving low bass drone with periodic sweep
+          const chaseBass = this.ctx.createOscillator();
+          const chaseFilter = this.ctx.createBiquadFilter();
+          const chaseGain = this.ctx.createGain();
+
+          chaseBass.type = "sawtooth";
+          chaseBass.frequency.setValueAtTime(55.0, now); // A1
+          chaseFilter.type = "lowpass";
+          chaseFilter.frequency.setValueAtTime(220, now);
+          chaseFilter.Q.value = 4.0;
+          chaseGain.gain.setValueAtTime(0.16, now);
+
+          chaseBass.connect(chaseFilter);
+          chaseFilter.connect(chaseGain);
+          chaseGain.connect(actBus);
+          chaseBass.start(now);
+          nodes.push({ stop: () => chaseBass.stop() });
+
+        } else if (act === 4) {
+          /* ACT 4: DON'T TOUCH MY FRIENDS!
+             Defiant resonant heroic brass synth chords + heavy driving confrontation power */
+          const brassPitches = [116.54, 174.61, 233.08, 293.66]; // Bb2, F3, Bb3, D4
+          brassPitches.forEach((p, idx) => {
+            const osc = this.ctx.createOscillator();
+            const filter = this.ctx.createBiquadFilter();
+            const g = this.ctx.createGain();
+
+            osc.type = "sawtooth";
+            osc.frequency.setValueAtTime(p + (idx % 2 === 0 ? 0.3 : -0.3), now);
+
+            filter.type = "lowpass";
+            filter.frequency.setValueAtTime(450, now);
+            filter.Q.value = 3.5;
+
+            // Slow heroic filter sweep swell
+            const lfo = this.ctx.createOscillator();
+            const lfoGain = this.ctx.createGain();
+            lfo.frequency.setValueAtTime(0.15, now);
+            lfoGain.gain.setValueAtTime(200, now);
+            lfo.connect(lfoGain);
+            lfoGain.connect(filter.frequency);
+
+            g.gain.setValueAtTime(0.08 / brassPitches.length, now);
+
+            osc.connect(filter);
+            filter.connect(g);
+            g.connect(actBus);
+
+            osc.start(now);
+            lfo.start(now);
+            nodes.push({ stop: () => { osc.stop(); lfo.stop(); } });
+          });
+
+        } else if (act === 5) {
+          /* ACT 5: DID YOU SEE THAT?
+             Mysterious starlit twilight aftermath + high shimmering celestial sine chimes */
+          const twiFreqs = [130.81, 196.0, 261.63, 329.63]; // C3, G3, C4, E4
+          twiFreqs.forEach((f) => {
+            const osc = this.ctx.createOscillator();
+            const filter = this.ctx.createBiquadFilter();
+            const g = this.ctx.createGain();
+
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(f, now);
+
+            filter.type = "lowpass";
+            filter.frequency.setValueAtTime(500, now);
+            g.gain.setValueAtTime(0.035, now);
+
+            osc.connect(filter);
+            filter.connect(g);
+            g.connect(actBus);
+
+            osc.start(now);
+            nodes.push({ stop: () => osc.stop() });
+          });
+
+          // Sparse high crystal bells
+          const celestialPitches = [1046.5, 1318.5, 1567.98, 1760.0, 2093.0];
+          const bellTimer = setInterval(() => {
+            if (!this.isPlaying || this.activeAct !== 5) return;
+            const t = this.ctx.currentTime;
+            const bell = this.ctx.createOscillator();
+            const bellGain = this.ctx.createGain();
+            const pitch = celestialPitches[Math.floor(Math.random() * celestialPitches.length)];
+
+            bell.type = "sine";
+            bell.frequency.setValueAtTime(pitch, t);
+            bellGain.gain.setValueAtTime(0.001, t);
+            bellGain.gain.linearRampToValueAtTime(0.04, t + 0.05);
+            bellGain.gain.exponentialRampToValueAtTime(0.0001, t + 3.5);
+
+            bell.connect(bellGain);
+            bellGain.connect(this.reverbNode);
+            bell.start(t);
+            bell.stop(t + 3.6);
+          }, 3600);
+
+          nodes.push({ timer: bellTimer });
+        }
+
+        this.currentActNodes = nodes;
+      }
+    }
+
+    /* =========================================================================
+       CORE GALLERY STATE & CONTROLLER
+       ========================================================================= */
+    class ThrillerGallery {
+      constructor() {
+        this.currentIndex = 0;
+        this.scale = 1.0;
+        this.minScale = 0.8;
+        this.maxScale = 6.0;
+        this.translateX = 0;
+        this.translateY = 0;
+        this.isDragging = false;
+        this.dragStartX = 0;
+        this.dragStartY = 0;
+        this.lastTranslateX = 0;
+        this.lastTranslateY = 0;
+
+        // Autoplay
+        this.autoplayActive = false;
+        this.autoplayIntervalMs = 5000;
+        this.autoplayTimer = null;
+        this.autoplayStartTime = null;
+        this.autoplayRaf = null;
+
+        // Audio
+        this.audio = new ThrillerAudioEngine();
+
+        // DOM Elements
+        this.mainPhoto = document.getElementById('mainPhoto');
+        this.imageWrapper = document.getElementById('imageWrapper');
+        this.viewport = document.getElementById('viewport');
+        this.imageLoader = document.getElementById('imageLoader');
+        this.ambientGlow = document.getElementById('ambientGlow');
+        this.headerActBadge = document.getElementById('headerActBadge');
+        this.actsNav = document.getElementById('actsNav');
+        this.floatingInfo = document.getElementById('floatingInfo');
+        this.infoTitle = document.getElementById('infoTitle');
+        this.infoMeta = document.getElementById('infoMeta');
+        this.footerFilename = document.getElementById('footerFilename');
+        this.footerProgress = document.getElementById('footerProgress');
+        this.filmstrip = document.getElementById('filmstrip');
+        this.zoomLevel = document.getElementById('zoomLevel');
+        this.autoplayBtn = document.getElementById('autoplayBtn');
+        this.autoplayProgress = document.getElementById('autoplayProgress');
+        this.soundBtn = document.getElementById('soundBtn');
+        this.soundWave = document.getElementById('soundWave');
+        this.volumeSlider = document.getElementById('volumeSlider');
+        this.audioPrompt = document.getElementById('audioPrompt');
+
+        this.init();
+      }
+
+      init() {
+        this.buildActsNav();
+        this.buildFilmstrip();
+        this.attachEventListeners();
+        this.goToPhoto(0, false);
+
+        // Preload next 2 photos
+        this.preloadSurrounding(0);
+      }
+
+      buildActsNav() {
+        this.actsNav.innerHTML = '';
+        for (let actNum = 1; actNum <= 5; actNum++) {
+          const act = ACT_THEMES[actNum];
+          const btn = document.createElement('button');
+          btn.className = `act-tab ${actNum === 1 ? 'active' : ''}`;
+          btn.id = `actTab-${actNum}`;
+          btn.innerHTML = `<span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:currentColor;"></span> Act ${actNum}: ${act.title}`;
+          btn.addEventListener('click', () => {
+            const firstPhotoIndex = PHOTOS.findIndex(p => p.act === actNum);
+            if (firstPhotoIndex !== -1) {
+              this.goToPhoto(firstPhotoIndex);
+            }
+          });
+          this.actsNav.appendChild(btn);
+        }
+      }
+
+      buildFilmstrip() {
+        this.filmstrip.innerHTML = '';
+        PHOTOS.forEach((photo, idx) => {
+          const card = document.createElement('div');
+          card.className = `thumb-card ${idx === 0 ? 'active' : ''}`;
+          card.id = `thumb-${idx}`;
+
+          const img = document.createElement('img');
+          img.src = safeFileUrl(photo.file, true);
+          img.alt = photo.id;
+          img.loading = "lazy";
+          img.onerror = () => { img.src = safeFileUrl(photo.file, false); };
+
+          const badge = document.createElement('span');
+          badge.className = 'thumb-badge';
+          badge.textContent = `A${photo.act}`;
+
+          card.appendChild(img);
+          card.appendChild(badge);
+          card.addEventListener('click', () => this.goToPhoto(idx));
+          this.filmstrip.appendChild(card);
+        });
+      }
+
+      attachEventListeners() {
+        // Navigation buttons
+        document.getElementById('prevBtn').addEventListener('click', () => this.prevPhoto());
+        document.getElementById('nextBtn').addEventListener('click', () => this.nextPhoto());
+
+        // Zoom buttons
+        document.getElementById('zoomInBtn').addEventListener('click', () => this.zoomRelative(1.3));
+        document.getElementById('zoomOutBtn').addEventListener('click', () => this.zoomRelative(1 / 1.3));
+        document.getElementById('zoomResetBtn').addEventListener('click', () => this.resetZoom());
+
+        // Autoplay
+        this.autoplayBtn.addEventListener('click', () => this.toggleAutoplay());
+        document.getElementById('speedSelect').addEventListener('change', (e) => {
+          this.autoplayIntervalMs = parseInt(e.target.value, 10);
+          if (this.autoplayActive) {
+            this.startAutoplayTimer();
+          }
+        });
+
+        // Sound & Volume
+        this.soundBtn.addEventListener('click', () => this.toggleAudio());
+        this.volumeSlider.addEventListener('input', (e) => {
+          this.audio.setVolume(parseFloat(e.target.value));
+        });
+
+        // Audio Banner prompt
+        this.audioPrompt.addEventListener('click', () => {
+          this.enableAudioWithFeedback();
+        });
+
+        // Fullscreen
+        document.getElementById('fullscreenBtn').addEventListener('click', () => this.toggleFullscreen());
+
+        // Help Modal
+        const helpModal = document.getElementById('helpModal');
+        document.getElementById('helpBtn').addEventListener('click', () => helpModal.classList.add('open'));
+        document.getElementById('modalCloseBtn').addEventListener('click', () => helpModal.classList.remove('open'));
+        helpModal.addEventListener('click', (e) => {
+          if (e.target === helpModal) helpModal.classList.remove('open');
+        });
+
+        // Filmstrip Collapse Toggle
+        const filmstripToggle = document.getElementById('filmstripToggle');
+        const filmstripToggleText = document.getElementById('filmstripToggleText');
+        let filmstripVisible = true;
+        filmstripToggle.addEventListener('click', () => {
+          filmstripVisible = !filmstripVisible;
+          this.filmstrip.style.display = filmstripVisible ? 'flex' : 'none';
+          filmstripToggleText.textContent = filmstripVisible ? 'Hide Filmstrip' : 'Show Filmstrip';
+          document.documentElement.style.setProperty('--filmstrip-height', filmstripVisible ? '96px' : '32px');
+        });
+
+        // Keyboard navigation
+        window.addEventListener('keydown', (e) => this.handleKeyDown(e));
+
+        // Viewport Mouse Wheel Zooming
+        this.viewport.addEventListener('wheel', (e) => this.handleWheel(e), { passive: false });
+
+        // Double Click to Quick Zoom
+        this.viewport.addEventListener('dblclick', (e) => this.handleDoubleClick(e));
+
+        // Pan & Drag events
+        this.viewport.addEventListener('mousedown', (e) => this.handleMouseDown(e));
+        window.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+        window.addEventListener('mouseup', () => this.handleMouseUp());
+
+        // Touch gestures (pinch and swipe)
+        this.attachTouchGestures();
+
+        // Start audio context on very first user gesture anywhere
+        const firstInteractionHandler = () => {
+          if (this.audio.ctx && this.audio.ctx.state === 'suspended') {
+            this.audio.ctx.resume();
+          }
+          window.removeEventListener('click', firstInteractionHandler);
+          window.removeEventListener('keydown', firstInteractionHandler);
+        };
+        window.addEventListener('click', firstInteractionHandler);
+        window.addEventListener('keydown', firstInteractionHandler);
+      }
+
+      enableAudioWithFeedback() {
+        this.audioPrompt.classList.add('hidden');
+        this.audio.start();
+        this.audio.transitionToAct(PHOTOS[this.currentIndex].act);
+        this.soundWave.classList.add('playing');
+        this.soundBtn.classList.add('active');
+        document.getElementById('soundLabel').textContent = "Music On";
+      }
+
+      toggleAudio() {
+        this.audioPrompt.classList.add('hidden');
+        const active = this.audio.toggle();
+        if (active) {
+          this.audio.transitionToAct(PHOTOS[this.currentIndex].act);
+          this.soundWave.classList.add('playing');
+          this.soundBtn.classList.add('active');
+          document.getElementById('soundLabel').textContent = "Music On";
+        } else {
+          this.soundWave.classList.remove('playing');
+          this.soundBtn.classList.remove('active');
+          document.getElementById('soundLabel').textContent = "Muted";
+        }
+      }
+
+      handleKeyDown(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+
+        switch (e.key) {
+          case 'ArrowLeft':
+          case 'a':
+          case 'A':
+            this.prevPhoto();
+            break;
+          case 'ArrowRight':
+          case 'd':
+          case 'D':
+            this.nextPhoto();
+            break;
+          case ' ':
+            e.preventDefault();
+            this.toggleAutoplay();
+            break;
+          case '+':
+          case '=':
+            this.zoomRelative(1.25);
+            break;
+          case '-':
+          case '_':
+            this.zoomRelative(1 / 1.25);
+            break;
+          case '0':
+            this.resetZoom();
+            break;
+          case 'm':
+          case 'M':
+            this.toggleAudio();
+            break;
+          case 'f':
+          case 'F':
+            this.toggleFullscreen();
+            break;
+          case 'p':
+          case 'P':
+            this.toggleAutoplay();
+            break;
+          case '?':
+            document.getElementById('helpModal').classList.toggle('open');
+            break;
+          case 'Escape':
+            document.getElementById('helpModal').classList.remove('open');
+            if (this.scale > 1.05) this.resetZoom();
+            break;
+          case '1': case '2': case '3': case '4': case '5':
+            const actNum = parseInt(e.key, 10);
+            const photoIdx = PHOTOS.findIndex(p => p.act === actNum);
+            if (photoIdx !== -1) this.goToPhoto(photoIdx);
+            break;
+        }
+      }
+
+      /* =========================================================================
+         NAVIGATION & THEME UPDATING
+         ========================================================================= */
+      goToPhoto(index, animate = true) {
+        if (index < 0) index = PHOTOS.length - 1;
+        if (index >= PHOTOS.length) index = 0;
+        this.currentIndex = index;
+
+        const photo = PHOTOS[index];
+        const actTheme = ACT_THEMES[photo.act];
+
+        // Reset zoom & pan when navigating to a fresh photo
+        this.resetZoom(false);
+
+        // Update Theme Colors (Background & Accents)
+        document.documentElement.style.setProperty('--act-bg-1', actTheme.bg1);
+        document.documentElement.style.setProperty('--act-bg-2', actTheme.bg2);
+        document.documentElement.style.setProperty('--act-accent', actTheme.accent);
+        document.documentElement.style.setProperty('--act-accent-glow', actTheme.glow);
+        document.documentElement.style.setProperty('--act-badge-bg', actTheme.badgeBg);
+        document.documentElement.style.setProperty('--act-border', actTheme.border);
+
+        // Update Header & Overlay Text
+        this.headerActBadge.textContent = `Act ${photo.act}: ${photo.actTitle}`;
+        this.infoTitle.textContent = `Act ${photo.act}: ${photo.actTitle}`;
+
+        const actPhotos = PHOTOS.filter(p => p.act === photo.act);
+        const actPhotoNum = actPhotos.findIndex(p => p.file === photo.file) + 1;
+        this.infoMeta.textContent = `Photo ${actPhotoNum} of ${actPhotos.length} in this Act • Total ${index + 1} / ${PHOTOS.length}`;
+
+        this.footerFilename.textContent = photo.file;
+        this.footerProgress.textContent = `${index + 1} / ${PHOTOS.length}`;
+
+        // Update Act Tabs active state
+        document.querySelectorAll('.act-tab').forEach((tab, i) => {
+          tab.classList.toggle('active', (i + 1) === photo.act);
+        });
+
+        // Update Filmstrip cards
+        document.querySelectorAll('.thumb-card').forEach((card, i) => {
+          card.classList.toggle('active', i === index);
+        });
+
+        // Smooth scroll filmstrip to keep active thumbnail centered
+        const activeThumb = document.getElementById(`thumb-${index}`);
+        if (activeThumb) {
+          activeThumb.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+
+        // Image loading state
+        this.imageLoader.classList.add('active');
+        this.mainPhoto.classList.add('loading');
+
+        const newSrc = safeFileUrl(photo.file, false);
+        const tempImg = new Image();
+        tempImg.onload = () => {
+          this.mainPhoto.src = newSrc;
+          this.mainPhoto.classList.remove('loading');
+          this.imageLoader.classList.remove('active');
+        };
+        tempImg.onerror = () => {
+          this.mainPhoto.src = safeFileUrl(photo.file, false);
+          this.mainPhoto.classList.remove('loading');
+          this.imageLoader.classList.remove('active');
+        };
+        tempImg.src = newSrc;
+
+        // Transition background atmospheric music to this act!
+        if (this.audio.isPlaying) {
+          this.audio.transitionToAct(photo.act);
+        }
+
+        // If autoplaying, restart the countdown timer for the next slide
+        if (this.autoplayActive) {
+          this.startAutoplayTimer();
+        }
+
+        // Preload next & previous
+        this.preloadSurrounding(index);
+      }
+
+      nextPhoto() {
+        this.goToPhoto(this.currentIndex + 1);
+      }
+
+      prevPhoto() {
+        this.goToPhoto(this.currentIndex - 1);
+      }
+
+      preloadSurrounding(index) {
+        const indicesToPreload = [
+          (index + 1) % PHOTOS.length,
+          (index + 2) % PHOTOS.length,
+          (index - 1 + PHOTOS.length) % PHOTOS.length
+        ];
+        indicesToPreload.forEach(idx => {
+          const img = new Image();
+          img.src = safeFileUrl(PHOTOS[idx].file, false);
+        });
+      }
+
+      /* =========================================================================
+         ZOOM & PAN CONTROLS
+         ========================================================================= */
+      updateTransform(animate = true) {
+        this.imageWrapper.style.transition = animate ? 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)' : 'none';
+        this.imageWrapper.style.transform = `translate(${this.translateX}px, ${this.translateY}px) scale(${this.scale})`;
+        this.zoomLevel.textContent = `${Math.round(this.scale * 100)}%`;
+
+        if (this.scale > 1.05) {
+          this.viewport.classList.add('is-zoomed');
+        } else {
+          this.viewport.classList.remove('is-zoomed');
+        }
+      }
+
+      zoomRelative(factor, centerX = null, centerY = null) {
+        const oldScale = this.scale;
+        let newScale = Math.min(this.maxScale, Math.max(this.minScale, this.scale * factor));
+        if (Math.abs(newScale - 1.0) < 0.05) newScale = 1.0;
+
+        if (centerX !== null && centerY !== null) {
+          // Zoom focused on cursor position
+          const rect = this.viewport.getBoundingClientRect();
+          const offsetX = centerX - (rect.left + rect.width / 2);
+          const offsetY = centerY - (rect.top + rect.height / 2);
+
+          const scaleRatio = newScale / oldScale;
+          this.translateX = offsetX - (offsetX - this.translateX) * scaleRatio;
+          this.translateY = offsetY - (offsetY - this.translateY) * scaleRatio;
+        }
+
+        this.scale = newScale;
+        if (this.scale === 1.0) {
+          this.translateX = 0;
+          this.translateY = 0;
+        } else {
+          this.clampBounds();
+        }
+
+        this.updateTransform(true);
+      }
+
+      resetZoom(animate = true) {
+        this.scale = 1.0;
+        this.translateX = 0;
+        this.translateY = 0;
+        this.updateTransform(animate);
+      }
+
+      handleWheel(e) {
+        e.preventDefault();
+        const factor = e.deltaY < 0 ? 1.15 : (1 / 1.15);
+        this.zoomRelative(factor, e.clientX, e.clientY);
+      }
+
+      handleDoubleClick(e) {
+        if (this.scale > 1.1) {
+          this.resetZoom(true);
+        } else {
+          this.zoomRelative(2.5, e.clientX, e.clientY);
+        }
+      }
+
+      handleMouseDown(e) {
+        if (this.scale <= 1.05) return;
+        this.isDragging = true;
+        this.dragStartX = e.clientX;
+        this.dragStartY = e.clientY;
+        this.lastTranslateX = this.translateX;
+        this.lastTranslateY = this.translateY;
+        this.viewport.classList.add('is-dragging');
+      }
+
+      handleMouseMove(e) {
+        if (!this.isDragging) return;
+        const deltaX = e.clientX - this.dragStartX;
+        const deltaY = e.clientY - this.dragStartY;
+        this.translateX = this.lastTranslateX + deltaX;
+        this.translateY = this.lastTranslateY + deltaY;
+        this.clampBounds();
+        this.updateTransform(false);
+      }
+
+      handleMouseUp() {
+        if (this.isDragging) {
+          this.isDragging = false;
+          this.viewport.classList.remove('is-dragging');
+        }
+      }
+
+      clampBounds() {
+        const photoRect = this.mainPhoto.getBoundingClientRect();
+        const maxPanX = Math.max(0, (photoRect.width * this.scale - window.innerWidth * 0.9) / 2);
+        const maxPanY = Math.max(0, (photoRect.height * this.scale - window.innerHeight * 0.8) / 2);
+        this.translateX = Math.max(-maxPanX - 100, Math.min(maxPanX + 100, this.translateX));
+        this.translateY = Math.max(-maxPanY - 100, Math.min(maxPanY + 100, this.translateY));
+      }
+
+      /* Touch gesture support for trackpads and phones */
+      attachTouchGestures() {
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let initialPinchDistance = 0;
+        let initialPinchScale = 1;
+
+        this.viewport.addEventListener('touchstart', (e) => {
+          if (e.touches.length === 1) {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            if (this.scale > 1.05) {
+              this.isDragging = true;
+              this.dragStartX = touchStartX;
+              this.dragStartY = touchStartY;
+              this.lastTranslateX = this.translateX;
+              this.lastTranslateY = this.translateY;
+            }
+          } else if (e.touches.length === 2) {
+            this.isDragging = false;
+            initialPinchDistance = Math.hypot(
+              e.touches[0].clientX - e.touches[1].clientX,
+              e.touches[0].clientY - e.touches[1].clientY
+            );
+            initialPinchScale = this.scale;
+          }
+        }, { passive: true });
+
+        this.viewport.addEventListener('touchmove', (e) => {
+          if (e.touches.length === 1 && this.isDragging && this.scale > 1.05) {
+            const deltaX = e.touches[0].clientX - this.dragStartX;
+            const deltaY = e.touches[0].clientY - this.dragStartY;
+            this.translateX = this.lastTranslateX + deltaX;
+            this.translateY = this.lastTranslateY + deltaY;
+            this.clampBounds();
+            this.updateTransform(false);
+          } else if (e.touches.length === 2) {
+            const currentDist = Math.hypot(
+              e.touches[0].clientX - e.touches[1].clientX,
+              e.touches[0].clientY - e.touches[1].clientY
+            );
+            const scaleFactor = currentDist / initialPinchDistance;
+            this.scale = Math.min(this.maxScale, Math.max(this.minScale, initialPinchScale * scaleFactor));
+            this.updateTransform(false);
+          }
+        }, { passive: true });
+
+        this.viewport.addEventListener('touchend', (e) => {
+          this.isDragging = false;
+          if (e.changedTouches.length === 1 && this.scale <= 1.05) {
+            const deltaX = e.changedTouches[0].clientX - touchStartX;
+            const deltaY = e.changedTouches[0].clientY - touchStartY;
+            if (Math.abs(deltaX) > 60 && Math.abs(deltaY) < 50) {
+              if (deltaX < 0) this.nextPhoto();
+              else this.prevPhoto();
+            }
+          }
+        });
+      }
+
+      /* =========================================================================
+         AUTOPLAY ENGINE
+         ========================================================================= */
+      toggleAutoplay() {
+        this.autoplayActive = !this.autoplayActive;
+        if (this.autoplayActive) {
+          this.autoplayBtn.classList.add('active');
+          document.getElementById('autoplayLabel').textContent = "Playing";
+          this.startAutoplayTimer();
+        } else {
+          this.autoplayBtn.classList.remove('active');
+          document.getElementById('autoplayLabel').textContent = "Autoplay";
+          this.stopAutoplayTimer();
+        }
+      }
+
+      startAutoplayTimer() {
+        this.stopAutoplayTimer();
+        this.autoplayStartTime = performance.now();
+
+        const updateRing = () => {
+          if (!this.autoplayActive) return;
+          const elapsed = performance.now() - this.autoplayStartTime;
+          const progress = Math.min(1.0, elapsed / this.autoplayIntervalMs);
+          const circumference = 2 * Math.PI * 6; // 37.699
+          const offset = circumference * (1 - progress);
+          this.autoplayProgress.style.strokeDashoffset = offset;
+
+          if (elapsed >= this.autoplayIntervalMs) {
+            this.nextPhoto();
+          } else {
+            this.autoplayRaf = requestAnimationFrame(updateRing);
+          }
+        };
+
+        this.autoplayRaf = requestAnimationFrame(updateRing);
+      }
+
+      stopAutoplayTimer() {
+        if (this.autoplayRaf) {
+          cancelAnimationFrame(this.autoplayRaf);
+          this.autoplayRaf = null;
+        }
+        const circumference = 2 * Math.PI * 6;
+        this.autoplayProgress.style.strokeDashoffset = circumference;
+      }
+
+      toggleFullscreen() {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          }
+        }
+      }
+    }
+
+    // Launch gallery once DOM is loaded
+    window.addEventListener('DOMContentLoaded', () => {
+      window.gallery = new ThrillerGallery();
+    });
+  </script>
+</body>
+</html>
