@@ -310,10 +310,15 @@
       max-width: 100%;
       max-height: 100%;
       display: flex;
+      flex: 0 0 auto;
       align-items: center;
       justify-content: center;
       transform-origin: center center;
-      will-change: transform;
+    }
+
+    .image-wrapper.is-zoomed {
+      max-width: none;
+      max-height: none;
     }
 
     .main-photo {
@@ -322,7 +327,7 @@
       object-fit: contain;
       border-radius: 8px;
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.1);
-      transition: opacity 0.3s ease, filter 0.3s ease;
+      transition: opacity 0.3s ease, filter 0.3s ease, width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       pointer-events: auto;
     }
 
@@ -1380,6 +1385,8 @@
         this.scale = 1.0;
         this.minScale = 0.8;
         this.maxScale = 6.0;
+        this.fitPhotoWidth = 0;
+        this.fitPhotoHeight = 0;
         this.translateX = 0;
         this.translateY = 0;
         this.isDragging = false;
@@ -1529,6 +1536,14 @@
 
         // Keyboard navigation
         window.addEventListener('keydown', (e) => this.handleKeyDown(e));
+        window.addEventListener('resize', () => {
+          this.fitPhotoWidth = 0;
+          this.fitPhotoHeight = 0;
+          this.resetZoom(false);
+          if (this.mainPhoto.complete && this.mainPhoto.naturalWidth) {
+            this.captureFitSize();
+          }
+        });
 
         // Viewport Mouse Wheel Zooming
         this.viewport.addEventListener('wheel', (e) => this.handleWheel(e), { passive: false });
@@ -1649,6 +1664,11 @@
 
         // Reset zoom & pan when navigating to a fresh photo
         this.resetZoom(false);
+        this.fitPhotoWidth = 0;
+        this.fitPhotoHeight = 0;
+        this.mainPhoto.style.width = '';
+        this.mainPhoto.style.maxWidth = '';
+        this.mainPhoto.style.maxHeight = '';
 
         // Update Theme Colors (Background & Accents)
         document.documentElement.style.setProperty('--act-bg-1', actTheme.bg1);
@@ -1692,6 +1712,7 @@
         const newSrc = safeFileUrl(photo.file, false);
         const tempImg = new Image();
         tempImg.onload = () => {
+          this.mainPhoto.onload = () => this.captureFitSize();
           this.mainPhoto.src = newSrc;
           this.mainPhoto.classList.remove('loading');
           this.imageLoader.classList.remove('active');
@@ -1740,9 +1761,37 @@
       /* =========================================================================
          ZOOM & PAN CONTROLS
          ========================================================================= */
+      captureFitSize() {
+        const fitSize = this.mainPhoto.getBoundingClientRect();
+        this.fitPhotoWidth = fitSize.width;
+        this.fitPhotoHeight = fitSize.height;
+        if (this.fitPhotoWidth > 0) {
+          const pixelRatio = window.devicePixelRatio || 1;
+          this.maxScale = Math.min(
+            6,
+            this.mainPhoto.naturalWidth / (this.fitPhotoWidth * pixelRatio),
+            this.mainPhoto.naturalHeight / (this.fitPhotoHeight * pixelRatio)
+          );
+          this.maxScale = Math.max(1, this.maxScale);
+          this.mainPhoto.style.maxWidth = 'none';
+          this.mainPhoto.style.maxHeight = 'none';
+          this.mainPhoto.style.width = `${this.fitPhotoWidth}px`;
+        }
+      }
+
       updateTransform(animate = true) {
         this.imageWrapper.style.transition = animate ? 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)' : 'none';
-        this.imageWrapper.style.transform = `translate(${this.translateX}px, ${this.translateY}px) scale(${this.scale})`;
+        this.imageWrapper.style.transform = `translate(${this.translateX}px, ${this.translateY}px)`;
+        this.imageWrapper.classList.toggle('is-zoomed', this.scale > 1.05);
+        if (this.fitPhotoWidth > 0) {
+          this.mainPhoto.style.maxWidth = 'none';
+          this.mainPhoto.style.maxHeight = 'none';
+          this.mainPhoto.style.width = `${this.fitPhotoWidth * this.scale}px`;
+        } else {
+          this.mainPhoto.style.maxWidth = '';
+          this.mainPhoto.style.maxHeight = '';
+          this.mainPhoto.style.width = '';
+        }
         this.zoomLevel.textContent = `${Math.round(this.scale * 100)}%`;
 
         if (this.scale > 1.05) {
@@ -1828,9 +1877,8 @@
       }
 
       clampBounds() {
-        const photoRect = this.mainPhoto.getBoundingClientRect();
-        const maxPanX = Math.max(0, (photoRect.width * this.scale - window.innerWidth * 0.9) / 2);
-        const maxPanY = Math.max(0, (photoRect.height * this.scale - window.innerHeight * 0.8) / 2);
+        const maxPanX = Math.max(0, (this.fitPhotoWidth * this.scale - window.innerWidth * 0.9) / 2);
+        const maxPanY = Math.max(0, (this.fitPhotoHeight * this.scale - window.innerHeight * 0.8) / 2);
         this.translateX = Math.max(-maxPanX - 100, Math.min(maxPanX + 100, this.translateX));
         this.translateY = Math.max(-maxPanY - 100, Math.min(maxPanY + 100, this.translateY));
       }
